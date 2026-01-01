@@ -1,0 +1,51 @@
+services:
+  # Base de Datos: SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: task-sql-server
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Stefanini2025!
+      - MSSQL_PID=Express
+    networks:
+      - task-network
+
+  # Broker: Kafka (Usando Confluent, más estable para Java)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: task-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - task-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: task-kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - task-network
+
+  # Métricas: Prometheus
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: task-prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - task-network
+
+networks:
+  task-network:
+    driver: bridge
