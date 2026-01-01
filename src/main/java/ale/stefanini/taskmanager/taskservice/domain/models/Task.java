@@ -11,7 +11,7 @@ public class Task {
     private UUID id;
     private String title;
     private String description;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private TaskStatus status;
 
     public void complete() {

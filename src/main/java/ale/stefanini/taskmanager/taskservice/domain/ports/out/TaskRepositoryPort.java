@@ -7,7 +7,10 @@ import java.util.UUID;
 
 public interface TaskRepositoryPort {
     Task save(Task task);
+
     Optional<Task> findById(UUID id);
+
     List<Task> findAll();
+
     void deleteById(UUID id);
 }
