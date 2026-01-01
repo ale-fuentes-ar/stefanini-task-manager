@@ -1,0 +1,7 @@
+CREATE TABLE tasks (
+    id UNIQUEIDENTIFIER PRIMARY KEY,
+    title NVARCHAR(255) NOT NULL,
+    description NVARCHAR(MAX),
+    created_at DATETIME2 NOT NULL,
+    status NVARCHAR(50) NOT NULL
+);
