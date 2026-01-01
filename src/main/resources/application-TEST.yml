@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
-      ddl-auto: validate # Usaremos migraciones manuales (Flyway)
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -18,17 +18,4 @@ spring:
     baseline-on-migrate: true
 
 server:
-  port: 8081
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, prometheus, metrics
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+  port: 0
