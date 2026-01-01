@@ -13,8 +13,8 @@ public class TaskPersistenceMapper {
                 domainModel.getId(),
                 domainModel.getTitle(),
                 domainModel.getDescription(),
-                domainModel.getStatus(),
-                domainModel.getCreatedAt()
+                domainModel.getCreatedAt(),
+                domainModel.getStatus()
             );
     }
 

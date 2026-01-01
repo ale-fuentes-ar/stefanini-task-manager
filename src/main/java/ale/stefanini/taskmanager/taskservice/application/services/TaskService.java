@@ -14,7 +14,9 @@ import ale.stefanini.taskmanager.taskservice.domain.ports.in.GetTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.UpdateTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskRepositoryPort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTaskUseCase, DeleteTaskUseCase {
@@ -23,6 +25,7 @@ public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTas
 
     @Override
     public Task createTask(Task task) {
+        log.info("Create a new task with title : {}", task.getTitle());
         task.setId(UUID.randomUUID());
         task.setCreatedAt(LocalDateTime.now());
 
