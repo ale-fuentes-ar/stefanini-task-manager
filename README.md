@@ -108,3 +108,64 @@ Se utilizó **GitFlow** estrictamente para la gestión de ramas:
 - `feature/*`: Desarrollo de funcionalidades aisladas (CRUD, UI, CI/CD).
 
 ---
+
+## Diagramas
+
+- **Arquitectura (Hexagonal / Ports & Adapters):** Diagrama de alto nivel que muestra las capas y adaptadores principales del proyecto.
+
+```mermaid
+graph TD
+    subgraph Frontend
+        A[Angular Frontend]
+    end
+    subgraph Backend
+        direction TB
+        C[Controllers / REST API]
+        S["Application Services (Use Cases)"]
+        D["Domain (Entities & Ports)"]
+        I[Infrastructure Adapters]
+        R["Repositories (JPA / SQL)"]
+    end
+    subgraph External
+        DB[(SQL Server)]
+        F[Flyway Migrations]
+        SW["Swagger / OpenAPI"]
+    end
+
+    A -->|HTTP JSON| C
+    C --> S
+    S --> D
+    D --> I
+    I --> R
+    R --> DB
+    F --> R
+    C -->|Docs| SW
+
+    classDef infra fill:#f9f,stroke:#333,stroke-width:1px;
+    class I,R,DB,F infra;
+```
+
+- **Flujo de datos (ej. crear una tarea):** Secuencia desde la UI hasta la persistencia y respuesta.
+
+```mermaid
+sequenceDiagram
+    participant FE as Frontend (Angular)
+    participant API as REST Controller
+    participant APP as Application Service
+    participant DOM as Domain (Entity/Port)
+    participant REP as Repository (JPA)
+    participant DB as SQL Server
+
+    FE->>API: POST /tasks {taskDto}
+    API->>APP: mapToCommand(taskDto)
+    APP->>DOM: executeCreate(command)
+    DOM->>REP: save(entity)
+    REP->>DB: INSERT task
+    DB-->>REP: generated id
+    REP-->>DOM: entity with id
+    DOM-->>APP: domain event / dto
+    APP-->>API: response dto (201 Created)
+    API-->>FE: 201 Created (Location + body)
+```
+
+
