@@ -1,0 +1,19 @@
+%% Sequence - Create Task
+sequenceDiagram
+  participant FE as Frontend (Angular)
+  participant API as REST Controller
+  participant APP as Application Service
+  participant DOM as Domain (Entity/Port)
+  participant REP as Repository (JPA)
+  participant DB as SQL Server
+
+  FE->>API: POST /tasks {taskDto}
+  API->>APP: mapToCommand(taskDto)
+  APP->>DOM: executeCreate(command)
+  DOM->>REP: save(entity)
+  REP->>DB: INSERT task
+  DB-->>REP: generated id
+  REP-->>DOM: entity with id
+  DOM-->>APP: domain event / dto
+  APP-->>API: response dto (201 Created)
+  API-->>FE: 201 Created (Location + body)

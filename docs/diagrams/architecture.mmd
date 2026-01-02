@@ -1,0 +1,30 @@
+%% Architecture - Hexagonal (Ports & Adapters)
+graph TD
+  subgraph Frontend
+    A[Angular Frontend]
+  end
+  subgraph Backend
+    direction TB
+    C[Controllers / REST API]
+    S[Application Services (Use Cases)]
+    D[Domain (Entities & Ports)]
+    I[Infrastructure Adapters]
+    R[Repositories (JPA / SQL)]
+  end
+  subgraph External
+    DB[(SQL Server)]
+    F[Flyway Migrations]
+    SW[Swagger / OpenAPI]
+  end
+
+  A -->|HTTP JSON| C
+  C --> S
+  S --> D
+  D --> I
+  I --> R
+  R --> DB
+  F --> R
+  C -->|Docs| SW
+
+  classDef infra fill:#f9f,stroke:#333,stroke-width:1px;
+  class I,R,DB,F infra;
