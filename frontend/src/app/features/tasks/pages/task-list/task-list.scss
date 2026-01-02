@@ -1,0 +1,31 @@
+.task-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px; // Espacio entre los botones
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.btn-delete {
+  background-color: #dc3545; // Rojo para eliminar
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+
+  &:hover { background-color: #a71d2a; }
+}
+
+.btn-edit {
+  background-color: #28a745; // Verde para completar
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+
+  &:hover { background-color: #1e7e34; }
+}
