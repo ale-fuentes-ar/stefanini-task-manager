@@ -1,0 +1,136 @@
+<div class="min-h-screen bg-slate-50 p-4 md:p-8">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- HEADER -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">My Tasks</h1>
+        <p class="text-slate-500 text-lg">Manage your daily to-dos and hit your deadlines.</p>
+      </div>
+
+      <!-- BOTÓN QUE ABRE EL MODAL -->
+      <button (click)="openCreateModal()"
+        class="bg-stefanini-blue hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+        <span class="text-xl">+</span> Add New Task
+      </button>
+    </header>
+
+    <!-- SUMMARY -->
+    <div class="lg:col-span-2 mb-6">
+      <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Stefanini Task Manager</h1>
+      <p class="text-slate-500 text-lg mt-2 mb-6">Manage your daily to-dos, track progress, and hit your deadlines
+        with style.</p>
+
+      <!-- STATS CARDS (Ahora integrados aquí) -->
+      <div class="flex flex-wrap gap-3">
+        <button (click)="filterStatus.set('ALL')" [class.ring-2]="filterStatus() === 'ALL'"
+          class="bg-white px-4 py-2 rounded-full border shadow-sm text-sm font-medium transition-all">
+          All Tasks <span class="ml-2 text-slate-400">{{ totalTasks() }}</span>
+        </button>
+
+        <button (click)="filterStatus.set(TaskStatus.PENDING)" [class.ring-2]="filterStatus() === TaskStatus.PENDING"
+          class="bg-white px-4 py-2 rounded-full border shadow-sm text-sm font-medium transition-all">
+          <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-2"></span>
+          Pending <span class="ml-2 text-slate-400">{{ pendingTasks() }}</span>
+        </button>
+
+        <button (click)="filterStatus.set(TaskStatus.IN_PROGRESS)"
+          [class.ring-2]="filterStatus() === TaskStatus.IN_PROGRESS"
+          class="bg-white px-4 py-2 rounded-full border shadow-sm text-sm font-medium transition-all">
+          <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-2"></span>
+          In Progress <span class="ml-2 text-slate-400">{{ progressTasks() }}</span>
+        </button>
+
+        <button (click)="filterStatus.set(TaskStatus.COMPLETED)"
+          [class.ring-2]="filterStatus() === TaskStatus.COMPLETED"
+          class="bg-white px-4 py-2 rounded-full border shadow-sm text-sm font-medium transition-all">
+          <span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+          Completed <span class="ml-2 text-slate-400">{{ completedTasks() }}</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- MAIN TABLE/GRID -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase">Task Title</th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase">Description</th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase text-center">Status</th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (task of filteredTasks(); track task.id) {
+            <tr class="hover:bg-slate-50/50 transition-colors group">
+              <td class="px-6 py-5">
+                <div class="font-semibold text-slate-900">{{ task.title }}</div>
+              </td>
+              <td class="px-6 py-5">
+                <div class="text-sm text-slate-500 max-w-xs truncate">{{ task.description }}</div>
+              </td>
+              <td class="px-6 py-5 text-center">
+                <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getBadgeClass(task.status)">
+                  {{ task.status }}
+                </span>
+              </td>
+              <td class="px-6 py-5 text-right">
+                <div class="flex justify-end gap-3">
+                  <button (click)="openEditModal(task)" class="p-2 text-slate-400 hover:text-blue-600 rounded-lg">
+                    ✎ <!-- Icono de editar -->
+                  </button>
+                  <button (click)="taskService.updateTaskStatus(task, TaskStatus.COMPLETED)"
+                    class="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                    title="Completar">
+                    ✔
+                  </button>
+                  <button (click)="taskService.deleteTask(task.id)"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    title="Excluir">
+                    🗑
+                  </button>
+                </div>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="4" class="px-6 py-20 text-center text-slate-400">
+                <p class="text-lg">No hay tareas pendientes.</p>
+                <p class="text-sm">¡Buen trabajo por hoy!</p>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MODAL POPUp -->
+    @if (showModal()) {
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform">
+
+        <!-- HEADER DEL MODAL (Aquí estaba el error, lo hacemos dinámico) -->
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 class="font-bold text-slate-800">
+            {{ taskToEdit() ? 'Edit Task' : 'Create New Task' }}
+          </h3>
+          <button (click)="showModal.set(false)" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        </div>
+
+        <!-- CONTENIDO DEL FORMULARIO -->
+        <div class="p-6">
+          <app-task-form [taskToEdit]="taskToEdit()" (onSuccess)="showModal.set(false)"
+            (onCancel)="showModal.set(false)" />
+        </div>
+
+      </div>
+    </div>
+    }
+
+  </div>
+</div>
