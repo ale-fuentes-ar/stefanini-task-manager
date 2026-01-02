@@ -165,4 +165,53 @@ sequenceDiagram
     API-->>FE: 201 Created (Location + body)
 ```
 
+- **CI github:** Secuencia ao publicar codigo nas branch main e develop.
+
+```mermaid
+graph TD
+    %% Definición de Estilos (Clases)
+    classDef trigger fill:#1E293B,stroke:#0F172A,stroke-width:2px,color:#FFFFFF;
+    classDef runner fill:#F8FAFC,stroke:#CBD5E1,stroke-width:2px,color:#0F172A;
+    classDef infra fill:#C2410C,stroke:#9A3412,stroke-width:2px,color:#FFFFFF;
+    classDef maven fill:#1E40AF,stroke:#1E3A8A,stroke-width:2px,color:#FFFFFF;
+    classDef success fill:#15803D,stroke:#14532D,stroke-width:2px,color:#FFFFFF;
+    classDef failure fill:#B91C1C,stroke:#7F1D1D,stroke-width:2px,color:#FFFFFF;
+    classDef decision fill:#374151,stroke:#111827,stroke-width:2px,color:#FFFFFF;
+
+    %% Nodos y Flujo
+    Start([Push / Pull Request]):::trigger --> Trigger{Branch?}:::decision
+    
+    Trigger -->|main / develop / feature/*| Runner[GitHub Hosted Runner: Ubuntu]:::runner
+
+    subgraph GitHubRunner[Entorno Virtual - GitHub Runner]
+        direction TB
+        SetupJDK[Set up JDK 21 Temurin]:::maven
+        Perms[Chmod +x mvnw]:::maven
+        
+        subgraph DockerServices[Servicios de Infraestructura - Docker]
+            SQL[(MS SQL Server 2022)]:::infra
+            HealthCheck{Health Check: sqlcmd}:::decision
+            SQL --- HealthCheck
+        end
+        
+        subgraph MavenCycle[Ciclo de Maven]
+            CreateDB[docker exec: CREATE DATABASE stefaninidb]:::maven
+            Build[./mvnw package]:::maven
+            Tests[./mvnw test]:::maven
+        end
+    end
+
+    %% Conexiones
+    Runner --> SetupJDK
+    SetupJDK --> Perms
+    Perms --> HealthCheck
+    HealthCheck -->|Healthy| CreateDB
+    CreateDB --> Build
+    Build --> Tests
+    
+    %% Resultado Final
+    Tests --> Result{Status?}:::decision
+    Result -->|Success| Green[Check Verde: Merge OK]:::success
+    Result -->|Failure| Red[Check Rojo: Notificar Error]:::failure
+```
 
