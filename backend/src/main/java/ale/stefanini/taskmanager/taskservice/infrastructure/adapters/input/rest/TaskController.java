@@ -17,6 +17,7 @@ import ale.stefanini.taskmanager.taskservice.domain.ports.in.CreateTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.DeleteTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.GetTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.UpdateTaskUseCase;
+import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,10 +50,21 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> getAllTasks() {
-        return getTaskUseCase.getAllTasks().stream()
+    public ResponseEntity<PaginatedResponse<TaskResponse>> getAllTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        PaginatedResponse<Task> result = getTaskUseCase.getAllTasks(page, size);
+        List<TaskResponse> responseContent = result.getContent().stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
+        PaginatedResponse<TaskResponse> response = new PaginatedResponse<>(
+                responseContent,
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getCurrentPage(),
+                result.getPageSize());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
