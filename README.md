@@ -61,16 +61,6 @@ Interfaz vanguardista utilizando el motor **Zoneless** y **Signals** para una re
     Levanta la base de datos SQL Server y servicios secundarios:
     ```bash
     docker-compose up -d
-
-    # verificar si en database 'stefaninidg' exist
-    # 1- si Exited (0) => ejecuto script sin problemas
-    docker ps -a --filter "name=task-sql-init"
-
-    # 2- visualizar logs, si no retorna, no hubo logs de errores
-    docker logs task-sql-init
-
-    # 3- Listar los bancos de datos disponibles, como utilice gitbash, uso al inicio dos barras '//opt...'
-    docker exec -it task-sql-server //opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Stefanini2025!' -C -Q "SELECT name FROM sys.databases"
     ```
 
 4. Ejecución Backend

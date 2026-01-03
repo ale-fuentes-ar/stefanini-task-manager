@@ -22,6 +22,11 @@ export class TaskListComponent implements OnInit {
   progressTasks = computed(() => this.taskService.tasks().filter(t => t.status === TaskStatus.IN_PROGRESS).length);
   completedTasks = computed(() => this.taskService.tasks().filter(t => t.status === TaskStatus.COMPLETED).length);
 
+  pages = computed(() => {
+    const total = this.taskService.totalPages();
+    return Array.from({ length: total }, (_, i) => i);
+  });
+
   filteredTasks = computed(() => {
     const tasks = this.taskService.tasks();
     const filter = this.filterStatus();

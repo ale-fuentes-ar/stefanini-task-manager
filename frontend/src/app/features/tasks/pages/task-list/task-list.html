@@ -105,6 +105,60 @@
             }
           </tbody>
         </table>
+
+        <!-- FOOTER DE PAGINACIÓN -->
+        <div
+          class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+
+          <div class="text-sm text-slate-500">
+            Showing <span class="font-bold text-slate-900">{{ (taskService.currentPage() * taskService.pageSize()) + 1
+              }}</span>
+            to <span class="font-bold text-slate-900">{{ (taskService.currentPage() + 1) * taskService.pageSize() >
+              taskService.totalElements() ? taskService.totalElements() : (taskService.currentPage() + 1) *
+              taskService.pageSize() }}</span>
+            of <span class="font-bold text-slate-900">{{ taskService.totalElements() }}</span> results
+          </div>
+
+          <div class="flex items-center gap-1">
+
+            <button [disabled]="taskService.currentPage() === 0" (click)="taskService.fetchTasks(0)"
+              class="p-2 text-slate-400 hover:text-stefanini-blue disabled:opacity-20 transition-all"
+              title="First Page">
+              «
+            </button>
+
+            <button [disabled]="taskService.currentPage() === 0"
+              (click)="taskService.fetchTasks(taskService.currentPage() - 1)"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 rounded-lg disabled:opacity-30 transition-all">
+              Previous
+            </button>
+
+            <div class="flex items-center gap-1 mx-2">
+              @for (p of pages(); track p) {
+              <button (click)="taskService.fetchTasks(p)" [class]="p === taskService.currentPage() 
+            ? 'bg-stefanini-blue text-white shadow-md shadow-blue-200' 
+            : 'text-slate-600 hover:bg-white hover:border-slate-200 border border-transparent'"
+                class="w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold transition-all">
+                {{ p + 1 }}
+              </button>
+              }
+            </div>
+
+            <button [disabled]="(taskService.currentPage() + 1) >= taskService.totalPages()"
+              (click)="taskService.fetchTasks(taskService.currentPage() + 1)"
+              class="px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white border border-transparent hover:border-slate-200 rounded-lg disabled:opacity-30 transition-all">
+              Next
+            </button>
+
+            <button [disabled]="(taskService.currentPage() + 1) >= taskService.totalPages()"
+              (click)="taskService.fetchTasks(taskService.totalPages() - 1)"
+              class="p-2 text-slate-400 hover:text-stefanini-blue disabled:opacity-20 transition-all" title="Last Page">
+              »
+            </button>
+
+          </div>
+        </div>
+
       </div>
     </div>
 

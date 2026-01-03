@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import ale.stefanini.taskmanager.taskservice.domain.models.Task;
+import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.CreateTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.DeleteTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.GetTaskUseCase;
@@ -38,8 +39,8 @@ public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTas
     }
 
     @Override
-    public List<Task> getAllTasks() {
-        return taskRepositoryPort.findAll();
+    public PaginatedResponse<Task> getAllTasks(int page, int size) {
+        return taskRepositoryPort.findAll(page, size);
     }
 
     @Override
