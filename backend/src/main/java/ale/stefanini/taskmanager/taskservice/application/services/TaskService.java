@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.PostConstruct;
 
 import ale.stefanini.taskmanager.taskservice.domain.models.Task;
 import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
@@ -19,10 +22,29 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTaskUseCase, DeleteTaskUseCase {
 
     private final TaskRepositoryPort taskRepositoryPort;
+    private final MeterRegistry meterRegistry;
+
+    private Counter tasksCreatedCounter;
+    private Counter tasksDeletedCounter;
+
+    public TaskService(TaskRepositoryPort taskRepositoryPort, MeterRegistry meterRegistry) {
+        this.taskRepositoryPort = taskRepositoryPort;
+        this.meterRegistry = meterRegistry;
+    }
+
+    @PostConstruct
+    public void initMetrics() {
+        tasksCreatedCounter = Counter.builder("stefanini.tasks.created")
+                .description("Total de tareas creadas")
+                .register(meterRegistry);
+
+        tasksDeletedCounter = Counter.builder("stefanini.tasks.deleted")
+                .description("Total de tareas eliminadas")
+                .register(meterRegistry);
+    }
 
     @Override
     public Task createTask(Task task) {
@@ -30,7 +52,10 @@ public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTas
         task.setId(UUID.randomUUID());
         task.setCreatedAt(LocalDateTime.now());
 
-        return taskRepositoryPort.save(task);
+        Task savedTask = taskRepositoryPort.save(task);
+        this.tasksCreatedCounter.increment();
+        log.info("MétricaÇ Tarea creada incrementada con ID: {}", savedTask.getId());
+        return savedTask;
     }
 
     @Override
@@ -57,6 +82,10 @@ public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTas
     public boolean deleteTask(UUID id) {
         return taskRepositoryPort.findById(id).map(task -> {
             taskRepositoryPort.deleteById(id);
+
+            this.tasksDeletedCounter.increment();
+            log.info("Métrica: Tarea eliminada incrementada con ID: {}", id);
+
             return true;
         }).orElse(false);
     }
