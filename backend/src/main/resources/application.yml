@@ -1,6 +1,13 @@
 spring:
+  # application
   application:
     name: task-service
+    title: Stefanini Task Manager - Enterprise Edition
+    version: v1.0
+    formatted-version: ☕︎ Version 1.0 - to building 
+    author: ᝰ🖋 Alejandro Fuentes | github ale-fuentes-ar
+
+  # datasource
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=stefaninidb;encrypt=true;trustServerCertificate=true;
     username: sa

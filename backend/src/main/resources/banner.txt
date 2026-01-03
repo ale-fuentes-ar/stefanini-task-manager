@@ -1,0 +1,17 @@
+${AnsiColor.BRIGHT_BLUE}
+   _____ _       __                 _       _ 
+  / ____| |     / _|               (_)     (_)
+ | (___ | |_ ___| |_ __ _ _ __  _ _ _ _ __  _ 
+  \___ \| __/ _ \  _/ _` | '_ \| | | | '_ \| |
+  ____) | ||  __/ || (_| | | | | | | | | | | |
+ |_____/ \__\___|_| \__,_|_| |_|_|_|_|_| |_|_|
+ ..:: 𓋒 Service
+
+${AnsiColor.BRIGHT_CYAN}
+ ${spring.application.title} | ${spring.application.formatted-version}
+ ${spring.application.author}
+${AnsiColor.DEFAULT}
+ Spring Boot Version: ${spring-boot.version}
+ Java Version: ${java.version}
+ Application Status: ${AnsiColor.GREEN}READY${AnsiColor.DEFAULT}
+--------------------------------------------------
