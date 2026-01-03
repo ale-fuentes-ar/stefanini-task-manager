@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Task, TaskRequest, TaskStatus } from '../models/task.model';
+import { PaginatedResponse, Task, TaskRequest, TaskStatus } from '../models/task.model';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -12,12 +12,22 @@ export class TaskService {
 
   tasks = signal<Task[]>([]);
   loading = signal<boolean>(false);
+  totalElements = signal(0);
+  totalPages = signal(0);
+  currentPage = signal(0);
+  pageSize = signal(5);
 
-  async fetchTasks() {
+  async fetchTasks(page: number = 0) {
     this.loading.set(true);
+    const url = `${this.apiUrl}?page=${page}&size=${this.pageSize()}`;
+
     try {
-      const data = await firstValueFrom(this.http.get<Task[]>(this.apiUrl));
-      this.tasks.set(data);
+      const res = await firstValueFrom(this.http.get<PaginatedResponse<Task>>(url));
+
+      this.tasks.set(res.content);
+      this.totalElements.set(res.totalElements);
+      this.totalPages.set(res.totalPages);
+      this.currentPage.set(res.currentPage);
     } catch (error) {
       console.error('Error fetching tasks', error);
     } finally {
@@ -27,8 +37,8 @@ export class TaskService {
 
   async addTask(task: TaskRequest) {
     try {
-      const res = await firstValueFrom(this.http.post<Task>(this.apiUrl, task));
-      this.tasks.update(current => [...current, res]);
+      await firstValueFrom(this.http.post<Task>(this.apiUrl, task));
+      await this.fetchTasks(0);
     } catch (error) {
       console.error('Error adding task', error);
     }
@@ -63,7 +73,7 @@ export class TaskService {
   async deleteTask(id: string) {
     try {
       await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
-      this.tasks.update(current => current.filter(t => t.id !== id));
+      await this.fetchTasks(this.currentPage());
     } catch (error) {
       console.error('Error al borrar:', error);
     }

@@ -12,4 +12,12 @@ export interface Task {
     status: TaskStatus;
 }
 
+export interface PaginatedResponse<T>{
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+}
+
 export type TaskRequest = Omit<Task, 'id' | 'createdAt'>;

@@ -1,7 +1,7 @@
 package ale.stefanini.taskmanager.taskservice.domain.ports.out;
 
 import ale.stefanini.taskmanager.taskservice.domain.models.Task;
-import java.util.List;
+import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,7 +10,7 @@ public interface TaskRepositoryPort {
 
     Optional<Task> findById(UUID id);
 
-    List<Task> findAll();
+    PaginatedResponse<Task> findAll(int page, int size);
 
     void deleteById(UUID id);
 }
