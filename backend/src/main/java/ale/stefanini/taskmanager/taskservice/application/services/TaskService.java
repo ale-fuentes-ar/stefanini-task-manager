@@ -17,6 +17,7 @@ import ale.stefanini.taskmanager.taskservice.domain.ports.in.DeleteTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.GetTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.in.UpdateTaskUseCase;
 import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskRepositoryPort;
+import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskNotificationPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,13 +27,18 @@ public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTas
 
     private final TaskRepositoryPort taskRepositoryPort;
     private final MeterRegistry meterRegistry;
+    private final TaskNotificationPort taskNotificationPort;
 
     private Counter tasksCreatedCounter;
     private Counter tasksDeletedCounter;
 
-    public TaskService(TaskRepositoryPort taskRepositoryPort, MeterRegistry meterRegistry) {
+    public TaskService(
+            TaskRepositoryPort taskRepositoryPort,
+            MeterRegistry meterRegistry,
+            TaskNotificationPort taskNotificationPort) {
         this.taskRepositoryPort = taskRepositoryPort;
         this.meterRegistry = meterRegistry;
+        this.taskNotificationPort = taskNotificationPort;
     }
 
     @PostConstruct
@@ -53,8 +59,16 @@ public class TaskService implements CreateTaskUseCase, GetTaskUseCase, UpdateTas
         task.setCreatedAt(LocalDateTime.now());
 
         Task savedTask = taskRepositoryPort.save(task);
+
+        try {
+            taskNotificationPort.notifyTaskCreated(savedTask);
+            log.info("Notificación enviada a traves del puerto - ID: {}", savedTask.getId());
+        } catch (Exception e) {
+            log.error("Error al notificar, pero la tarea se guardó en el DB - ID: {}", savedTask.getId(), e);
+        }
+
         this.tasksCreatedCounter.increment();
-        log.info("MétricaÇ Tarea creada incrementada con ID: {}", savedTask.getId());
+        log.info("Métrica: Tarea creada incrementada con ID: {}", savedTask.getId());
         return savedTask;
     }
 
