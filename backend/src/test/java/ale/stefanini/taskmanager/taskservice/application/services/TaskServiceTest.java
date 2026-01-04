@@ -4,6 +4,7 @@ import ale.stefanini.taskmanager.taskservice.domain.models.Task;
 import ale.stefanini.taskmanager.taskservice.domain.models.TaskStatus;
 import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
 import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskRepositoryPort;
+import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskNotificationPort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ public class TaskServiceTest {
 
     @Mock
     private TaskRepositoryPort taskRepositoryPort;
+    @Mock
+    private TaskNotificationPort taskNotificationPort;
     @InjectMocks
     private TaskService taskService;
     private Task sampleTask;
@@ -37,6 +40,8 @@ public class TaskServiceTest {
                 .description("This is a sample task description.")
                 .status(TaskStatus.PENDING)
                 .build();
+        
+        taskService.initMetrics();
     }
 
     @Test
