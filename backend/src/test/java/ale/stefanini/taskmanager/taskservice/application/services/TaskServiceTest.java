@@ -1,22 +1,21 @@
 package ale.stefanini.taskmanager.taskservice.application.services;
 
+import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
 import ale.stefanini.taskmanager.taskservice.domain.models.Task;
 import ale.stefanini.taskmanager.taskservice.domain.models.TaskStatus;
-import ale.stefanini.taskmanager.taskservice.domain.models.PaginatedResponse;
 import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskRepositoryPort;
 import ale.stefanini.taskmanager.taskservice.domain.ports.out.TaskNotificationPort;
-
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.List;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,21 +26,27 @@ public class TaskServiceTest {
 
     @Mock
     private TaskRepositoryPort taskRepositoryPort;
+    
     @Mock
     private TaskNotificationPort taskNotificationPort;
-    @InjectMocks
+
+    private MeterRegistry meterRegistry;
     private TaskService taskService;
     private Task sampleTask;
 
     @BeforeEach
     void setUp() {
-        sampleTask = Task.builder()
-                .title("Sample Task")
-                .description("This is a sample task description.")
-                .status(TaskStatus.PENDING)
-                .build();
+        meterRegistry = new SimpleMeterRegistry();
+        taskService = new TaskService(taskRepositoryPort, meterRegistry, taskNotificationPort);
         
         taskService.initMetrics();
+
+        sampleTask = Task.builder()
+                .id(UUID.randomUUID())
+                .title("Sample Task")
+                .description("Description")
+                .status(TaskStatus.PENDING)
+                .build();
     }
 
     @Test
@@ -56,6 +61,7 @@ public class TaskServiceTest {
         assertNotNull(created);
         assertEquals("Sample Task", created.getTitle());
         verify(taskRepositoryPort, times(1)).save(any(Task.class));
+        verify(taskNotificationPort, times(1)).notifyTaskCreated(any(Task.class));
     }
 
     @Test
@@ -72,24 +78,21 @@ public class TaskServiceTest {
     }
 
     @Test
-    void shouldReturnrPaginatedTasks() {
-        //Arrange
+    void shouldReturnPaginatedTasks() {
+        // Arrange
         int page = 0;
         int size = 5;
-        List<Task> tasksList = List.of(sampleTask);
-        PaginatedResponse<Task> mockResponse = new PaginatedResponse<>(tasksList, 1, 1, 0, 5);
-
+        PaginatedResponse<Task> mockResponse = new PaginatedResponse<>(List.of(sampleTask), 1, 1, 0, 5);
         when(taskRepositoryPort.findAll(page, size)).thenReturn(mockResponse);
 
-        //Act
+        // Act
         PaginatedResponse<Task> result = taskService.getAllTasks(page, size);
 
-        //Assert
+        // Assert
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals(0, result.getCurrentPage());
         verify(taskRepositoryPort, times(1)).findAll(page, size);
-
     }
 
 }
